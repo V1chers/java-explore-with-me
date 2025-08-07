@@ -1,0 +1,1 @@
+INSERT INTO apps (name) VALUES ('ewm-main-service');
