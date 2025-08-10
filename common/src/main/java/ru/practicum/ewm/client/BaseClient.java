@@ -152,7 +152,7 @@ public class BaseClient {
 
     private String fillParameterCollections(Map<String, Collection<Object>> parameterCollections, String path) {
         if (parameterCollections == null) {
-            return null;
+            return path;
         }
 
         String pathToChange = path;

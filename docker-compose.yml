@@ -17,7 +17,7 @@ services:
     depends_on:
       - stats-server
     environment:
-      - ewm-server.url=http://stats-server:9090
+      - EWM_SERVER_URL=http://stats-server:9090
 
   stats-db:
     image: postgres:16.1

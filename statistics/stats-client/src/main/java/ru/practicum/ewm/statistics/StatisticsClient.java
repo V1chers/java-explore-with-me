@@ -16,7 +16,7 @@ import java.util.Map;
 public class StatisticsClient extends BaseClient {
 
     @Autowired
-    public StatisticsClient(@Value("${ewm-server.url}") String serverUrl, RestTemplateBuilder builder) {
+    public StatisticsClient(@Value("${ewm.server.url}") String serverUrl, RestTemplateBuilder builder) {
         super(
                 builder
                         .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
