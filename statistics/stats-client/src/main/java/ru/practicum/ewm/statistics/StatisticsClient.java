@@ -3,6 +3,7 @@ package ru.practicum.ewm.statistics;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -25,11 +26,11 @@ public class StatisticsClient extends BaseClient {
         );
     }
 
-    public void createStats(HitStatsDto hitStatsDto) {
-        post("/hit", hitStatsDto);
+    public ResponseEntity<Void> createStats(HitStatsDto hitStatsDto) {
+        return post("/hit", hitStatsDto, Void.class);
     }
 
-    public Object getStats(String start, String end, List<String> uris, boolean unique) {
+    public ResponseEntity<List> getStats(String start, String end, List<String> uris, boolean unique) {
         Map<String, Object> parameters = Map.of(
                 "start", start,
                 "end", end,
@@ -38,6 +39,6 @@ public class StatisticsClient extends BaseClient {
         );
 
         return get("/stats?start={start}&end={end}&uris={uris}&unique={unique}",
-                null, parameters);
+                null, parameters, List.class);
     }
 }
