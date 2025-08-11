@@ -17,7 +17,7 @@ import org.springframework.web.client.HttpStatusCodeException;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler
-    public ResponseEntity<JsonNode> ClientExceptionResult(final ClientExceptionResult e) {
+    public ResponseEntity<JsonNode> clientExceptionResult(final ClientExceptionResult e) {
         HttpStatusCodeException result = e.getException();
 
         try {
