@@ -1,0 +1,10 @@
+INSERT INTO state_action(name) VALUES
+('PUBLISHED'),
+('PENDING'),
+('CANCEL_REVIEW');
+
+INSERT INTO request_status(name) VALUES
+('PENDING'),
+('CONFIRMED'),
+('CANCELED'),
+('REJECTED');

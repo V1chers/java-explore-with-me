@@ -7,13 +7,15 @@ services:
       - "9090:9090"
     depends_on:
       - stats-db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/statistics
 
   stats-client:
     build: ./statistics/stats-client
     image: stats-client
     container_name: stats-client
     ports:
-      - "8080:8080"
+      - "9091:9091"
     depends_on:
       - stats-server
     environment:
@@ -28,6 +30,45 @@ services:
       - POSTGRES_PASSWORD=statistics
       - POSTGRES_USER=statistics
       - POSTGRES_DB=statistics
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
+
+  main-server:
+    build: ./main/main-server
+    image: main-server
+    container_name: main-server
+    ports:
+      - "8080:8080"
+    depends_on:
+      - stats-client
+      - main-db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://main-db:5432/main
+      - EWM_STATS_CLIENT_URL=http://stats-server:9090
+
+  main-client:
+    build: ./main/main-client
+    image: main-client
+    container_name: main-client
+    ports:
+      - "8081:8081"
+    depends_on:
+      - main-server
+    environment:
+      - EWM_SERVER_URL=http://main-server:8080
+
+  main-db:
+    image: postgres:16.1
+    container_name: main-db
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_PASSWORD=main
+      - POSTGRES_USER=main
+      - POSTGRES_DB=main
     healthcheck:
       test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
       timeout: 5s

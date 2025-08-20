@@ -5,7 +5,7 @@ import org.springframework.http.*;
 import org.springframework.lang.Nullable;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
-import ru.practicum.ewm.exception.ClientExceptionResult;
+import ru.practicum.ewm.exception.models.ClientExceptionResult;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -35,83 +35,66 @@ public class BaseClient {
     }
 
     protected <R> ResponseEntity<R> get(String path, Class<R> responseType) {
-        return get(path, null, null, responseType);
+        return get(path, null, responseType);
     }
 
-    protected <R> ResponseEntity<R> get(String path, long userId, Class<R> responseType) {
-        return get(path, userId, null, responseType);
-    }
-
-    protected <R> ResponseEntity<R> get(String path, Long userId,
+    protected <R> ResponseEntity<R> get(String path,
                                         @Nullable Map<String, Object> parameters,
                                         Class<R> responseType) {
-        return makeAndSendRequest(HttpMethod.GET, path, userId, parameters, null, responseType);
+        return makeAndSendRequest(HttpMethod.GET, path, parameters, null, responseType);
     }
 
     protected <T, R> ResponseEntity<R> post(String path, T body, Class<R> responseType) {
-        return post(path, null, null, body, responseType);
+        return post(path, null, body, responseType);
     }
 
-    protected <T, R> ResponseEntity<R> post(String path, long userId, T body, Class<R> responseType) {
-        return post(path, userId, null, body, responseType);
-    }
-
-    protected <T, R> ResponseEntity<R> post(String path, Long userId,
+    protected <T, R> ResponseEntity<R> post(String path,
                                             @Nullable Map<String, Object> parameters,
                                             T body, Class<R> responseType) {
-        return makeAndSendRequest(HttpMethod.POST, path, userId, parameters, body, responseType);
+        return makeAndSendRequest(HttpMethod.POST, path, parameters, body, responseType);
     }
 
-    protected <T, R> ResponseEntity<R> put(String path, long userId, T body, Class<R> responseType) {
-        return put(path, userId, null, body, responseType);
+    protected <T, R> ResponseEntity<R> put(String path, T body, Class<R> responseType) {
+        return put(path, null, body, responseType);
     }
 
-    protected <T, R> ResponseEntity<R> put(String path, long userId,
+    protected <T, R> ResponseEntity<R> put(String path,
                                            @Nullable Map<String, Object> parameters,
                                            T body, Class<R> responseType) {
-        return makeAndSendRequest(HttpMethod.PUT, path, userId, parameters, body, responseType);
+        return makeAndSendRequest(HttpMethod.PUT, path, parameters, body, responseType);
+    }
+
+    protected <R> ResponseEntity<R> patch(String path, Class<R> responseType) {
+        return patch(path, null, null, responseType);
     }
 
     protected <T, R> ResponseEntity<R> patch(String path, T body, Class<R> responseType) {
-        return patch(path, null, null, body, responseType);
+        return patch(path, null, body, responseType);
     }
 
-    protected <R> ResponseEntity<R> patch(String path, long userId, Class<R> responseType) {
-        return patch(path, userId, null, null, responseType);
-    }
-
-    protected <T, R> ResponseEntity<R> patch(String path, long userId, T body, Class<R> responseType) {
-        return patch(path, userId, null, body, responseType);
-    }
-
-    protected <T, R> ResponseEntity<R> patch(String path, Long userId,
+    protected <T, R> ResponseEntity<R> patch(String path,
                                              @Nullable Map<String, Object> parameters,
                                              T body, Class<R> responseType) {
-        return makeAndSendRequest(HttpMethod.PATCH, path, userId, parameters, body, responseType);
+        return makeAndSendRequest(HttpMethod.PATCH, path, parameters, body, responseType);
     }
 
     protected <R> ResponseEntity<R> delete(String path, Class<R> responseType) {
-        return delete(path, null, null, responseType);
+        return delete(path, null, responseType);
     }
 
-    protected <R> ResponseEntity<R> delete(String path, long userId, Class<R> responseType) {
-        return delete(path, userId, null, responseType);
-    }
-
-    protected <R> ResponseEntity<R> delete(String path, Long userId,
+    protected <R> ResponseEntity<R> delete(String path,
                                            @Nullable Map<String, Object> parameters,
                                            Class<R> responseType) {
-        return makeAndSendRequest(HttpMethod.DELETE, path, userId, parameters, null, responseType);
+        return makeAndSendRequest(HttpMethod.DELETE, path, parameters, null, responseType);
     }
 
-    private <T, R> ResponseEntity<R> makeAndSendRequest(HttpMethod method, String path, Long userId,
+    private <T, R> ResponseEntity<R> makeAndSendRequest(HttpMethod method, String path,
                                                         @Nullable Map<String, Object> parameters, @Nullable T body,
                                                         Class<R> responseType) {
-        HttpEntity<T> requestEntity = new HttpEntity<>(body, defaultHeaders(userId));
+        HttpEntity<T> requestEntity = new HttpEntity<>(body, defaultHeaders());
 
         Map<String, Collection<Object>> parameterCollections = findCollections(parameters);
         String filledPath = fillParameterCollections(parameterCollections, path);
-
 
         ResponseEntity<R> ewmServerResponse;
         try {
@@ -126,13 +109,10 @@ public class BaseClient {
         return prepareGatewayResponse(ewmServerResponse);
     }
 
-    private HttpHeaders defaultHeaders(Long userId) {
+    private HttpHeaders defaultHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-        if (userId != null) {
-            headers.set("X-Sharer-User-Id", String.valueOf(userId));
-        }
         return headers;
     }
 
