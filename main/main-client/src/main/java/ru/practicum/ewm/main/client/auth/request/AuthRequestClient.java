@@ -6,7 +6,6 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.ewm.client.BaseClient;
 
@@ -45,7 +44,6 @@ public class AuthRequestClient extends BaseClient {
         return post("?eventId={eventId}", parameters, Object.class);
     }
 
-    @PatchMapping(path = "/{requestId}/cancel")
     public ResponseEntity<Object> cancelRequest(Integer userId, Integer requestId) {
         Map<String, Object> parameters = Map.of(
                 "userId", userId,
