@@ -18,7 +18,10 @@ public class Stats {
     private App app;
 
     @Column
-    private String uri;
+    private String uriPath;
+
+    @Column
+    private Integer uriId;
 
     @Column
     private String ip;
