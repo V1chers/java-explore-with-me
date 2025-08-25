@@ -1,4 +1,4 @@
-package ru.practicum.ewm.main.server.logic.validation;
+package ru.practicum.ewm.main.server.logic.utils;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.practicum.ewm.exception.models.NotFoundException;

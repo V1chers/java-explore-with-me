@@ -11,8 +11,8 @@ import ru.practicum.ewm.main.server.client.StatsClient;
 import ru.practicum.ewm.main.server.dal.event.Event;
 import ru.practicum.ewm.main.server.dal.event.EventMapper;
 import ru.practicum.ewm.main.server.dal.event.EventRepository;
-import ru.practicum.ewm.main.server.logic.validation.EventServiceUtils;
-import ru.practicum.ewm.main.server.logic.validation.ServiceUtils;
+import ru.practicum.ewm.main.server.logic.utils.EventServiceUtils;
+import ru.practicum.ewm.main.server.logic.utils.ServiceUtils;
 import ru.practicum.ewm.stats.dto.GetStatsDto;
 
 import java.util.ArrayList;
@@ -81,7 +81,7 @@ public class OpenEventService {
         eventIdList.forEach(eventId -> statsClient.createStats(eventId, ip));
         HashMap<Integer, GetStatsDto> getStatsDtoList = statsClient.getStatsList(eventIdList);
 
-        return EventMapper.toGetListDto(eventList, getStatsDtoList);
+        return EventMapper.toGetShortDto(eventList, getStatsDtoList);
     }
 
     private List<GetShortEventDto> handleSortedByViews(String text,
@@ -99,7 +99,7 @@ public class OpenEventService {
         List<Integer> eventIdList = eventList.stream().map(Event::getId).toList();
         HashMap<Integer, GetStatsDto> getStatsDtoList = statsClient.getStatsList(eventIdList);
 
-        List<GetShortEventDto> eventDtoList = EventMapper.toGetListDto(eventList, getStatsDtoList);
+        List<GetShortEventDto> eventDtoList = EventMapper.toGetShortDto(eventList, getStatsDtoList);
         List<GetShortEventDto> sortedEventDtoList = eventDtoList.stream()
                 .sorted(Comparator.comparing(GetShortEventDto::getViews).reversed()).toList();
         List<GetShortEventDto> page = new ArrayList<>();

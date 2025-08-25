@@ -1,4 +1,4 @@
-package ru.practicum.ewm.main.server.logic.validation;
+package ru.practicum.ewm.main.server.logic.utils;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

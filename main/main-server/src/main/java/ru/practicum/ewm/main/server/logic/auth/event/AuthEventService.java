@@ -5,10 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.exception.models.NotFoundException;
-import ru.practicum.ewm.main.dto.event.CreateEventDto;
-import ru.practicum.ewm.main.dto.event.GetEventDto;
-import ru.practicum.ewm.main.dto.event.GetShortEventDto;
-import ru.practicum.ewm.main.dto.event.PatchEventDto;
+import ru.practicum.ewm.main.dto.event.*;
 import ru.practicum.ewm.main.dto.request.RequestDto;
 import ru.practicum.ewm.main.dto.request.StatusUpdateRequestDto;
 import ru.practicum.ewm.main.dto.request.StatusUpdateResultDto;
@@ -25,9 +22,9 @@ import ru.practicum.ewm.main.server.dal.request.RequestRepository;
 import ru.practicum.ewm.main.server.dal.request.RequestStatus;
 import ru.practicum.ewm.main.server.dal.user.User;
 import ru.practicum.ewm.main.server.dal.user.UserRepository;
-import ru.practicum.ewm.main.server.logic.validation.EventServiceUtils;
-import ru.practicum.ewm.main.server.logic.validation.RequestServiceUtils;
-import ru.practicum.ewm.main.server.logic.validation.ServiceUtils;
+import ru.practicum.ewm.main.server.logic.utils.EventServiceUtils;
+import ru.practicum.ewm.main.server.logic.utils.RequestServiceUtils;
+import ru.practicum.ewm.main.server.logic.utils.ServiceUtils;
 import ru.practicum.ewm.stats.dto.GetStatsDto;
 
 import java.util.HashMap;
@@ -60,7 +57,7 @@ public class AuthEventService {
         List<Integer> eventIdList = eventList.stream().map(Event::getId).toList();
         HashMap<Integer, GetStatsDto> getStatsDtoList = statsClient.getStatsList(eventIdList);
 
-        return EventMapper.toGetListDto(eventList, getStatsDtoList);
+        return EventMapper.toGetShortDto(eventList, getStatsDtoList);
     }
 
     @Transactional
@@ -95,6 +92,16 @@ public class AuthEventService {
         }
     }
 
+    public GetEventDtoWithComment getEventWithComment(Integer userId, Integer eventId) {
+        Event event = ServiceUtils.getIfExist(eventRepository, eventId, "Событие с данным id не найдено");
+
+        if (event.getUser().getId() == userId) {
+            return EventMapper.toGetDtoWithComment(event);
+        } else {
+            throw new NotFoundException("Неверное id пользователя");
+        }
+    }
+
     @Transactional
     public GetEventDto updateEvent(Integer userId, Integer eventId, PatchEventDto patchEventDto) {
         Event event = ServiceUtils.getIfExist(eventRepository, eventId, "Событие с данным id не найдено");
@@ -108,18 +115,7 @@ public class AuthEventService {
 
         eventServiceUtils.isEventDateTooEarly(newEvent.getEventDate());
 
-        if (patchEventDto.getCategory() != null) {
-            Category category = ServiceUtils.getIfExist(categoryRepository, patchEventDto.getCategory(),
-                    "Категория с данным id не найдено");
-            newEvent.setCategory(category);
-        } else {
-            newEvent.setCategory(event.getCategory());
-        }
-        if (patchEventDto.getLocation() != null) {
-            newEvent.setLocation(eventServiceUtils.getLocation(patchEventDto.getLocation())); // переделать
-        } else {
-            newEvent.setLocation(event.getLocation());
-        }
+        eventServiceUtils.setUpdatingEventFields(patchEventDto, newEvent, event);
 
         newEvent = eventRepository.save(newEvent);
 
