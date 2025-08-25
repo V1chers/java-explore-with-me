@@ -29,7 +29,7 @@
     <modules>
         <module>stats-server</module>
         <module>stats-client</module>
-        <module>common-stats</module>
+        <module>stats-dto</module>
     </modules>
 
 </project>
