@@ -13,7 +13,7 @@ public class AdminComment {
     private int tId;
 
     @Column
-    private String Comment;
+    private String comment;
 
     @OneToOne
     @MapsId

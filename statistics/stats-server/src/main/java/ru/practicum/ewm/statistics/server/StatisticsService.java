@@ -32,8 +32,8 @@ public class StatisticsService {
                 startString, endString, uris, unique);
 
         HashMap<String, Set<Integer>> uriPathIds = getUriPathIds(uris);
-        Instant start = StringToInstant(startString);
-        Instant end = StringToInstant(endString);
+        Instant start = stringToInstant(startString);
+        Instant end = stringToInstant(endString);
         List<GetStats> statsList = new ArrayList<>();
 
         isStartAfterEnd(start, end);
@@ -89,7 +89,7 @@ public class StatisticsService {
         return uriPathIds;
     }
 
-    private Instant StringToInstant(String instantSting) {
+    private Instant stringToInstant(String instantSting) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return StatsMapper.toInstant(LocalDateTime.parse(instantSting, dateTimeFormatter));
     }
