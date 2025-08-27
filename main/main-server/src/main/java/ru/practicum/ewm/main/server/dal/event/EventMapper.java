@@ -1,10 +1,7 @@
 package ru.practicum.ewm.main.server.dal.event;
 
 import ru.practicum.ewm.exception.models.ConflictException;
-import ru.practicum.ewm.main.dto.event.CreateEventDto;
-import ru.practicum.ewm.main.dto.event.GetEventDto;
-import ru.practicum.ewm.main.dto.event.GetShortEventDto;
-import ru.practicum.ewm.main.dto.event.PatchEventDto;
+import ru.practicum.ewm.main.dto.event.*;
 import ru.practicum.ewm.main.server.dal.category.CategoryMapper;
 import ru.practicum.ewm.main.server.dal.location.LocationMapper;
 import ru.practicum.ewm.main.server.dal.request.RequestStatus;
@@ -47,7 +44,7 @@ public class EventMapper {
         return event;
     }
 
-    public static GetShortEventDto toGetListDto(Event event) {
+    public static GetShortEventDto toGetShortDto(Event event) {
         GetShortEventDto getShortEventDto = new GetShortEventDto();
         getShortEventDto.setId(event.getId());
         getShortEventDto.setInitiator(UserMapper.toDto(event.getUser()));
@@ -64,13 +61,13 @@ public class EventMapper {
         return getShortEventDto;
     }
 
-    public static List<GetShortEventDto> toGetListDto(List<Event> eventList) {
-        return eventList.stream().map(EventMapper::toGetListDto).toList();
+    public static List<GetShortEventDto> toGetShortDto(List<Event> eventList) {
+        return eventList.stream().map(EventMapper::toGetShortDto).toList();
     }
 
-    public static List<GetShortEventDto> toGetListDto(List<Event> eventList, HashMap<Integer, GetStatsDto> getStatsDtoHashMap) {
+    public static List<GetShortEventDto> toGetShortDto(List<Event> eventList, HashMap<Integer, GetStatsDto> getStatsDtoHashMap) {
         return eventList.stream().map(event -> {
-            GetShortEventDto getShortEventDto = EventMapper.toGetListDto(event);
+            GetShortEventDto getShortEventDto = EventMapper.toGetShortDto(event);
 
             GetStatsDto getStatsDto = getStatsDtoHashMap.get(event.getId());
             if (getStatsDto != null) {
@@ -108,6 +105,10 @@ public class EventMapper {
         return getEventDto;
     }
 
+    public static List<GetEventDto> toGetDto(List<Event> eventList) {
+        return eventList.stream().map(EventMapper::toGetDto).toList();
+    }
+
     public static GetEventDto toGetDto(Event event, List<GetStatsDto> views) {
         GetEventDto getEventDto = EventMapper.toGetDto(event);
         if (views == null || views.isEmpty()) {
@@ -132,6 +133,17 @@ public class EventMapper {
 
             return getEventDto;
         }).toList();
+    }
+
+    public static GetEventDtoWithComment toGetDtoWithComment(Event event) {
+        GetEventDto getEventDto = EventMapper.toGetDto(event);
+
+        if (event.getAdminComment() == null) {
+            return new GetEventDtoWithComment(getEventDto, null);
+        } else {
+            AdminCommentDto commentDto = new AdminCommentDto(event.getAdminComment().getComment());
+            return new GetEventDtoWithComment(getEventDto, commentDto);
+        }
     }
 
     public static Event fromPatchDto(PatchEventDto patchEventDto, Event event) {
@@ -185,6 +197,7 @@ public class EventMapper {
 
     public static Event fromUserPatchDto(PatchEventDto patchEventDto, Event event) {
         Event newEvent = EventMapper.fromPatchDto(patchEventDto, event);
+        newEvent.setAdminComment(event.getAdminComment());
 
         if (patchEventDto.getStateAction() == null) {
             newEvent.setStateAction(event.getStateAction());

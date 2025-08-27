@@ -41,6 +41,15 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
                                 @Param("rangeEnd") Instant rangeEnd,
                                 Pageable pageable);
 
+    @Query(value = "select e " +
+            "from Event as e " +
+            "left join fetch e.user as u " +
+            "left join fetch e.category as c " +
+            "left join fetch e.location " +
+            "left join fetch e.requestList " +
+            "where e.stateAction = 2")
+    List<Event> getAllPending();
+
     @Query("select e " +
             "from Event as e " +
             "left join fetch e.user as u " +

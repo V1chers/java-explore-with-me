@@ -65,4 +65,8 @@ public class Event {
     @Column(name = "published_on")
     private Instant publishedOn;
 
+    @OneToOne(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    @PrimaryKeyJoinColumn
+    private AdminComment adminComment;
+
 }

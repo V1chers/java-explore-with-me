@@ -19,7 +19,7 @@ public class StatsMapper {
 
         statsList.forEach(getStats -> {
             GetStatsDto getStatsDto = new GetStatsDto();
-            getStatsDto.setUri(getStats.getUri());
+            getStatsDto.setUri("/" + getStats.getUriPath() + "/" + getStats.getUriId());
             getStatsDto.setApp(getStats.getApp().toString());
             getStatsDto.setHits(getStats.getTotalViews());
 
@@ -32,9 +32,12 @@ public class StatsMapper {
     public static Stats fromHitDto(HitStatsDto hitStatsDto) {
         Stats stats = new Stats();
         stats.setApp(App.of(hitStatsDto.getApp()));
-        stats.setUri(hitStatsDto.getUri());
         stats.setIp(hitStatsDto.getIp());
         stats.setCreated(toInstant(hitStatsDto.getTimestamp()));
+
+        String[] splittedUri = hitStatsDto.getUri().split("/");
+        stats.setUriPath(splittedUri[1]);
+        stats.setUriId(Integer.parseInt(splittedUri[2]));
 
         return stats;
     }

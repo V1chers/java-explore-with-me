@@ -6,18 +6,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import ru.practicum.ewm.exception.models.BadRequestException;
 import ru.practicum.ewm.exception.models.ConflictException;
-import ru.practicum.ewm.main.dto.event.GetEventDto;
-import ru.practicum.ewm.main.dto.event.PatchEventDto;
+import ru.practicum.ewm.main.dto.event.*;
 import ru.practicum.ewm.main.server.client.StatsClient;
-import ru.practicum.ewm.main.server.dal.category.Category;
-import ru.practicum.ewm.main.server.dal.category.CategoryRepository;
-import ru.practicum.ewm.main.server.dal.event.Event;
-import ru.practicum.ewm.main.server.dal.event.EventMapper;
-import ru.practicum.ewm.main.server.dal.event.EventRepository;
-import ru.practicum.ewm.main.server.dal.event.StateAction;
-import ru.practicum.ewm.main.server.logic.validation.EventServiceUtils;
-import ru.practicum.ewm.main.server.logic.validation.ServiceUtils;
+import ru.practicum.ewm.main.server.dal.event.*;
+import ru.practicum.ewm.main.server.logic.utils.EventServiceUtils;
+import ru.practicum.ewm.main.server.logic.utils.ServiceUtils;
 import ru.practicum.ewm.stats.dto.GetStatsDto;
 
 import java.time.Instant;
@@ -29,8 +24,6 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class AdminEventService {
     private final EventRepository eventRepository;
-
-    private final CategoryRepository categoryRepository;
 
     private final EventServiceUtils eventServiceUtils;
 
@@ -53,11 +46,16 @@ public class AdminEventService {
         List<Event> eventList = eventRepository
                 .findAllFiltered(users, statesIdList, categories, start, end, PageRequest.of(from, size)).toList();
 
-        System.out.println(eventList);
         List<Integer> eventIdList = eventList.stream().map(Event::getId).toList();
         HashMap<Integer, GetStatsDto> getStatsDtoHashMap = statsClient.getStatsList(eventIdList);
 
         return EventMapper.toGetDto(eventList, getStatsDtoHashMap);
+    }
+
+    public List<GetEventDto> getAllPendingEvents() {
+        List<Event> eventList = eventRepository.getAllPending();
+
+        return EventMapper.toGetDto(eventList);
     }
 
     @Transactional
@@ -69,18 +67,8 @@ public class AdminEventService {
 
         eventServiceUtils.isAdminEventDateTooEarly(newEvent.getEventDate());
 
-        if (patchEventDto.getCategory() != null) {
-            Category category = ServiceUtils.getIfExist(categoryRepository, patchEventDto.getCategory(),
-                    "Категория с данным id не найдено");
-            newEvent.setCategory(category);
-        } else {
-            newEvent.setCategory(event.getCategory());
-        }
-        if (patchEventDto.getLocation() != null) {
-            newEvent.setLocation(eventServiceUtils.getLocation(patchEventDto.getLocation())); // переделать
-        } else {
-            newEvent.setLocation(event.getLocation());
-        }
+        eventServiceUtils.setUpdatingEventFields(patchEventDto, newEvent, event);
+
         checkStateAction(event, newEvent);
 
         newEvent = eventRepository.save(newEvent);
@@ -88,9 +76,32 @@ public class AdminEventService {
         return EventMapper.toGetDto(newEvent);
     }
 
+    @Transactional
+    public GetEventDtoWithComment cancelEventWithComment(@PathVariable Integer eventId,
+                                                         @RequestBody PatchEventDtoWithComment patchEventDto) {
+        isCancelUpdate(patchEventDto);
+
+        Event event = ServiceUtils.getIfExist(eventRepository, eventId, "Событие с данным id не найдено");
+        Event newEvent = EventMapper.fromAdminPatchDto(patchEventDto.getPatchEventDto(), event);
+
+        eventServiceUtils.isAdminEventDateTooEarly(newEvent.getEventDate());
+
+        eventServiceUtils.setUpdatingEventFields(patchEventDto.getPatchEventDto(), newEvent, event);
+        setAdminComment(newEvent, patchEventDto.getAdminCommentDto());
+
+        checkStateAction(event, newEvent);
+
+        newEvent = eventRepository.save(newEvent);
+
+        return EventMapper.toGetDtoWithComment(newEvent);
+    }
+
     public void checkStateAction(Event event, Event updatingEvent) {
         if (updatingEvent.getStateAction() == null) {
             return;
+        }
+        if (event.getStateAction() == StateAction.PUBLISHED && updatingEvent.getStateAction() == StateAction.CANCELED) {
+            throw new ConflictException("Нельзя отменить опубликованное событие");
         }
         if (event.getStateAction() == StateAction.PUBLISHED) {
             throw new ConflictException("Опубликованные события нельзя изменить");
@@ -98,8 +109,26 @@ public class AdminEventService {
         if (event.getStateAction() != StateAction.PENDING && updatingEvent.getStateAction() == StateAction.PUBLISHED) {
             throw new ConflictException("Можно опубликовать только событие, ожидающее публикации");
         }
-        if (event.getStateAction() == StateAction.PUBLISHED && updatingEvent.getStateAction() == StateAction.CANCELED) {
-            throw new ConflictException("Нельзя отменить опубликованное событие");
+    }
+
+    public void isCancelUpdate(PatchEventDtoWithComment patchEventDtoWithComment) {
+        String patchStateAction = patchEventDtoWithComment.getPatchEventDto().getStateAction();
+
+        if (!patchStateAction.equals("REJECT_EVENT")) {
+            throw new BadRequestException("Событие должно быть отменено");
         }
+    }
+
+    private void setAdminComment(Event event, AdminCommentDto adminCommentDto) {
+        if (adminCommentDto == null) {
+            return;
+        }
+
+        AdminComment adminComment = new AdminComment();
+        adminComment.setId(event.getId());
+        adminComment.setComment(adminCommentDto.getComment());
+        adminComment.setEvent(event);
+
+        event.setAdminComment(adminComment);
     }
 }

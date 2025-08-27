@@ -1,10 +1,13 @@
-package ru.practicum.ewm.main.server.logic.validation;
+package ru.practicum.ewm.main.server.logic.utils;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.exception.models.ConflictException;
 import ru.practicum.ewm.exception.models.NotFoundException;
+import ru.practicum.ewm.main.dto.event.PatchEventDto;
 import ru.practicum.ewm.main.dto.location.LocationDto;
+import ru.practicum.ewm.main.server.dal.category.Category;
+import ru.practicum.ewm.main.server.dal.category.CategoryRepository;
 import ru.practicum.ewm.main.server.dal.event.Event;
 import ru.practicum.ewm.main.server.dal.event.StateAction;
 import ru.practicum.ewm.main.server.dal.location.Location;
@@ -25,6 +28,8 @@ import java.util.Optional;
 public class EventServiceUtils {
 
     private final LocationRepository locationRepository;
+
+    private final CategoryRepository categoryRepository;
 
     public void isWaitingOrCancel(StateAction stateAction) {
         if (stateAction != StateAction.PENDING && stateAction != StateAction.CANCELED) {
@@ -96,5 +101,20 @@ public class EventServiceUtils {
 
         LocalDateTime localDateTime = LocalDateTime.parse(dateTime, formatter);
         return localDateTime.atZone(ZoneId.systemDefault()).toInstant();
+    }
+
+    public void setUpdatingEventFields(PatchEventDto patchEventDto, Event newEvent, Event event) {
+        if (patchEventDto.getCategory() != null) {
+            Category category = ServiceUtils.getIfExist(categoryRepository, patchEventDto.getCategory(),
+                    "Категория с данным id не найдено");
+            newEvent.setCategory(category);
+        } else {
+            newEvent.setCategory(event.getCategory());
+        }
+        if (patchEventDto.getLocation() != null) {
+            newEvent.setLocation(getLocation(patchEventDto.getLocation()));
+        } else {
+            newEvent.setLocation(event.getLocation());
+        }
     }
 }

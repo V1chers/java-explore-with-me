@@ -4,7 +4,9 @@ public interface GetStats {
 
     App getApp();
 
-    String getUri();
+    String getUriPath();
+
+    Integer getUriId();
 
     Integer getTotalViews();
 }

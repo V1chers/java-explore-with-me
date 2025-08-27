@@ -78,3 +78,10 @@ CREATE TABLE IF NOT EXISTS event_compilation (
   CONSTRAINT fk_compilation_event FOREIGN KEY (event_id) REFERENCES event(id) ON DELETE CASCADE,
   CONSTRAINT fk_event_compilation FOREIGN KEY (compilation_id) REFERENCES compilation(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS admin_comment (
+  event_id BIGINT NOT NULL,
+  comment VARCHAR(7000) NOT NULL,
+  CONSTRAINT pk_admin_comment PRIMARY KEY (event_id),
+  CONSTRAINT fk_admin_comment_event FOREIGN KEY (event_id) REFERENCES event(id) ON DELETE CASCADE
+);

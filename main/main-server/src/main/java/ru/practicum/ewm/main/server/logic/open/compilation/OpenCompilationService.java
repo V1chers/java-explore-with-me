@@ -9,7 +9,7 @@ import ru.practicum.ewm.main.server.client.StatsClient;
 import ru.practicum.ewm.main.server.dal.compialtion.Compilation;
 import ru.practicum.ewm.main.server.dal.compialtion.CompilationMapper;
 import ru.practicum.ewm.main.server.dal.compialtion.CompilationRepository;
-import ru.practicum.ewm.main.server.logic.validation.ServiceUtils;
+import ru.practicum.ewm.main.server.logic.utils.ServiceUtils;
 import ru.practicum.ewm.stats.dto.GetStatsDto;
 
 import java.util.HashMap;
