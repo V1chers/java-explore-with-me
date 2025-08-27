@@ -125,7 +125,7 @@ public class AdminEventService {
         }
 
         AdminComment adminComment = new AdminComment();
-        adminComment.setTId(event.getId());
+        adminComment.setId(event.getId());
         adminComment.setComment(adminCommentDto.getComment());
         adminComment.setEvent(event);
 

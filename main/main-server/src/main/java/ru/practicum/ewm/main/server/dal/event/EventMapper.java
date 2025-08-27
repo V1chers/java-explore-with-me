@@ -138,16 +138,12 @@ public class EventMapper {
     public static GetEventDtoWithComment toGetDtoWithComment(Event event) {
         GetEventDto getEventDto = EventMapper.toGetDto(event);
 
-        GetEventDtoWithComment getEventDtoWithComment = new GetEventDtoWithComment();
-        getEventDtoWithComment.setEvent(getEventDto);
-
-        if (event.getAdminComment() != null) {
-            AdminCommentDto adminCommentDto = new AdminCommentDto();
-            adminCommentDto.setComment(event.getAdminComment().getComment());
-            getEventDtoWithComment.setComment(adminCommentDto);
+        if (event.getAdminComment() == null) {
+            return new GetEventDtoWithComment(getEventDto, null);
+        } else {
+            AdminCommentDto commentDto = new AdminCommentDto(event.getAdminComment().getComment());
+            return new GetEventDtoWithComment(getEventDto, commentDto);
         }
-
-        return getEventDtoWithComment;
     }
 
     public static Event fromPatchDto(PatchEventDto patchEventDto, Event event) {

@@ -10,7 +10,7 @@ public class AdminComment {
 
     @Id
     @Column(name = "event_id")
-    private int tId;
+    private int id;
 
     @Column
     private String comment;

@@ -9,8 +9,8 @@ public class PatchEventDtoWithComment {
 
     @NotNull
     @Valid
-    PatchEventDto patchEventDto;
+    private PatchEventDto patchEventDto;
 
     @Valid
-    AdminCommentDto adminCommentDto;
+    private AdminCommentDto adminCommentDto;
 }
