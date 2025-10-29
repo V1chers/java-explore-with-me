@@ -8,8 +8,8 @@ import ru.practicum.ewm.main.dto.category.CreateCategoryDto;
 import ru.practicum.ewm.main.server.dal.category.Category;
 import ru.practicum.ewm.main.server.dal.category.CategoryMapper;
 import ru.practicum.ewm.main.server.dal.category.CategoryRepository;
-import ru.practicum.ewm.main.server.logic.validation.CategoryServiceUtils;
-import ru.practicum.ewm.main.server.logic.validation.ServiceUtils;
+import ru.practicum.ewm.main.server.logic.utils.CategoryServiceUtils;
+import ru.practicum.ewm.main.server.logic.utils.ServiceUtils;
 
 @Service
 @RequiredArgsConstructor

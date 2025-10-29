@@ -13,7 +13,7 @@ import ru.practicum.ewm.stats.dto.HitStatsDto;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -31,26 +31,29 @@ public class StatisticsService {
         log.info("Начало получения статистики: startString = {}, endString = {}, uris = {}, unique = {}",
                 startString, endString, uris, unique);
 
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        Instant start = StatsMapper.toInstant(LocalDateTime.parse(startString, dateTimeFormatter));
-        Instant end = StatsMapper.toInstant(LocalDateTime.parse(endString, dateTimeFormatter));
+        HashMap<String, Set<Integer>> uriPathIds = getUriPathIds(uris);
+        Instant start = stringToInstant(startString);
+        Instant end = stringToInstant(endString);
+        List<GetStats> statsList = new ArrayList<>();
 
         isStartAfterEnd(start, end);
 
-        List<GetStats> statsList;
-
-        if (uris.contains("/events")) {
-            uris = null; //мне не особо нравится такое решение, но меня сильно время поджимало
-        }
-
         if (uris == null) {
-            statsList = unique ?
-                    statisticsRepository.getAllUniqueStats(start, end) :
-                    statisticsRepository.getAllStats(start, end);
+            if (unique) {
+                statsList.addAll(statisticsRepository.getAllUniqueStats(start, end));
+            } else {
+                statsList.addAll(statisticsRepository.getAllStats(start, end));
+            }
         } else {
-            statsList = unique ?
-                    statisticsRepository.getUniqueStats(start, end, uris) :
-                    statisticsRepository.getStats(start, end, uris);
+            // мне показалось, что здесь может приемлемо n+1,
+            // в рамках дипломной работы все равно больше одной итерации цикла не будет
+            uriPathIds.forEach((String uriPath, Set<Integer> uriIdList) -> {
+                if (unique) {
+                    statsList.addAll(statisticsRepository.getUniqueStats(start, end, uriPath, uriIdList));
+                } else {
+                    statsList.addAll(statisticsRepository.getStats(start, end, uriPath, uriIdList));
+                }
+            });
         }
 
         log.info("Получена статистика: {}", statsList);
@@ -62,5 +65,32 @@ public class StatisticsService {
         if (start.isAfter(end)) {
             throw new BadRequestException("Начало не может быть позже конца");
         }
+    }
+
+    private HashMap<String, Set<Integer>> getUriPathIds(List<String> uris) {
+        HashMap<String, Set<Integer>> uriPathIds = new HashMap<>();
+
+        if (uris != null) {
+            uris.forEach(uri -> {
+                String[] splittedUri = uri.split("/");
+
+                uriPathIds.computeIfAbsent(splittedUri[1], k -> new HashSet<>());
+
+                try {
+                    uriPathIds.get(splittedUri[1])
+                            .add(Integer.parseInt(splittedUri[2]));
+                } catch (IndexOutOfBoundsException e) {
+                    uriPathIds.get(splittedUri[1])
+                            .add(-1);
+                }
+            });
+        }
+
+        return uriPathIds;
+    }
+
+    private Instant stringToInstant(String instantSting) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return StatsMapper.toInstant(LocalDateTime.parse(instantSting, dateTimeFormatter));
     }
 }

@@ -4,10 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.ewm.main.dto.event.CreateEventDto;
-import ru.practicum.ewm.main.dto.event.GetEventDto;
-import ru.practicum.ewm.main.dto.event.GetShortEventDto;
-import ru.practicum.ewm.main.dto.event.PatchEventDto;
+import ru.practicum.ewm.main.dto.event.*;
 import ru.practicum.ewm.main.dto.request.RequestDto;
 import ru.practicum.ewm.main.dto.request.StatusUpdateRequestDto;
 import ru.practicum.ewm.main.dto.request.StatusUpdateResultDto;
@@ -40,6 +37,13 @@ public class AuthEventController {
     public GetEventDto getEvent(@PathVariable Integer userId,
                                 @PathVariable Integer eventId) {
         return authEventService.getEvent(userId, eventId);
+    }
+
+    //можно было бы модифицировать существующий эндпоинт, но боюсь тесты сломать
+    @GetMapping(path = "/{eventId}/comment")
+    public GetEventDtoWithComment getEventWithComment(@PathVariable Integer userId,
+                                                      @PathVariable Integer eventId) {
+        return authEventService.getEventWithComment(userId, eventId);
     }
 
     @PatchMapping(path = "/{eventId}")

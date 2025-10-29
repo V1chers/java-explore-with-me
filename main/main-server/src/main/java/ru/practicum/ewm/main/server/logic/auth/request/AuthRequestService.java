@@ -11,8 +11,8 @@ import ru.practicum.ewm.main.server.dal.request.RequestMapper;
 import ru.practicum.ewm.main.server.dal.request.RequestRepository;
 import ru.practicum.ewm.main.server.dal.request.RequestStatus;
 import ru.practicum.ewm.main.server.dal.user.UserRepository;
-import ru.practicum.ewm.main.server.logic.validation.RequestServiceUtils;
-import ru.practicum.ewm.main.server.logic.validation.ServiceUtils;
+import ru.practicum.ewm.main.server.logic.utils.RequestServiceUtils;
+import ru.practicum.ewm.main.server.logic.utils.ServiceUtils;
 
 import java.time.Instant;
 import java.util.List;
@@ -45,14 +45,11 @@ public class AuthRequestService {
 
         Event event = ServiceUtils.getIfExist(eventRepository, eventId, "Событие с данным id не найдено");
 
-        System.out.println(event.getRequestModeration());
         requestServiceUtils.isOrganizer(userId, event);
         requestServiceUtils.isPublished(event);
         requestServiceUtils.isLimitReached(event);
 
         Request request = createRequestObject(userId, event);
-
-        System.out.println(request);
 
         request = requestRepository.save(request);
 

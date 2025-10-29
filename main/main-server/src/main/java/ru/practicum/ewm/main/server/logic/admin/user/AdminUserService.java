@@ -11,7 +11,7 @@ import ru.practicum.ewm.main.dto.user.UserDto;
 import ru.practicum.ewm.main.server.dal.user.User;
 import ru.practicum.ewm.main.server.dal.user.UserMapper;
 import ru.practicum.ewm.main.server.dal.user.UserRepository;
-import ru.practicum.ewm.main.server.logic.validation.ServiceUtils;
+import ru.practicum.ewm.main.server.logic.utils.ServiceUtils;
 
 import java.util.List;
 import java.util.Optional;

@@ -11,7 +11,7 @@ import ru.practicum.ewm.main.server.dal.compialtion.CompilationMapper;
 import ru.practicum.ewm.main.server.dal.compialtion.CompilationRepository;
 import ru.practicum.ewm.main.server.dal.event.Event;
 import ru.practicum.ewm.main.server.dal.event.EventRepository;
-import ru.practicum.ewm.main.server.logic.validation.ServiceUtils;
+import ru.practicum.ewm.main.server.logic.utils.ServiceUtils;
 
 import java.util.HashSet;
 import java.util.List;
